@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<table border="1">
+    <caption>Таблица логов</caption>
+    <tr>
+        <th>Id</th>
+        <th>Дата записи</th>
+        <th>Сколько памяти занимает процесс</th>
+        <th>Куда пишутся логи</th>
+
+    </tr>
+    @foreach (var b in ViewBag.Logs)
+    {
+        <tr>
+            <td>@b.Id</td><td>@b.Date</td><td>@b.MemorySize</td><td>@ViewBag.Write</td>
+        </tr>
+    }
+</table>
+

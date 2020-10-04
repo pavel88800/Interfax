@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.ServiceModel;
 using System.ServiceProcess;
 using System.Threading.Tasks;
 using System.Timers;
 using BL;
-using DB.Models;
 
 namespace LogServiceApp
 {
@@ -14,6 +13,7 @@ namespace LogServiceApp
     {
         private Timer _aTimer;
         private string _config = "File";
+        private ServiceHost _serviceHost;
 
         public Service()
         {
@@ -25,15 +25,19 @@ namespace LogServiceApp
 
         protected override void OnStart(string[] args)
         {
+            if (_serviceHost == null)
+            {
+                _serviceHost = new ServiceHost(typeof(TestService));
+                _serviceHost.Open();
+            }
+
             CallCheckConfig();
             CallWrite();
-
-            //var b = ConfigurationManager.AppSettings.Get("Key0"); // Получить ключи из конфига
-            // EventLog.WriteEntry("LogServiceAppInfo", GetMemorySize().ToString(), EventLogEntryType.SuccessAudit); //запись в лог событий windows
         }
 
         protected override void OnStop()
         {
+            _serviceHost?.Close();
             _aTimer.Stop();
         }
 
@@ -84,18 +88,10 @@ namespace LogServiceApp
         }
 
         /// <summary>
-        ///     Получить данные из файла.
+        ///     Вызвать метод в зависимости от конфика
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
-        /// <returns></returns>
-        private static List<Log> Get(object source, ElapsedEventArgs e)
-        {
-            var loggingFile = new LoggingFile();
-
-            return loggingFile.GetData();
-        }
-
         private async void CallMethods(object source, ElapsedEventArgs e)
         {
             switch (_config)
@@ -109,16 +105,13 @@ namespace LogServiceApp
             }
         }
 
+        /// <summary>
+        ///     Запустить проверку конфига
+        /// </summary>
         private void CallCheckConfig()
         {
             _aTimer = new Timer(10000);
-            _aTimer.Elapsed += (source, _event) =>
-            {
-                _config = ConfigurationManager.AppSettings.Get("WRITE");
-
-
-                EventLog.WriteEntry("ConfigApp", _config, EventLogEntryType.SuccessAudit);
-            };
+            _aTimer.Elapsed += (source, _event) => { _config = ConfigurationManager.AppSettings.Get("WRITE"); };
             _aTimer.AutoReset = true;
             _aTimer.Enabled = true;
         }

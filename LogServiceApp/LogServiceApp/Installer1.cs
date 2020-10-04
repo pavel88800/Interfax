@@ -7,21 +7,20 @@ namespace LogServiceApp
     [RunInstaller(true)]
     public partial class Installer1 : Installer
     {
-        private readonly ServiceProcessInstaller processInstaller;
-
-        private readonly ServiceInstaller serviceInstaller;
+        private readonly ServiceProcessInstaller _processInstaller;
+        private readonly ServiceInstaller _serviceInstaller;
 
         public Installer1()
         {
             InitializeComponent();
-            serviceInstaller = new ServiceInstaller();
-            processInstaller = new ServiceProcessInstaller();
+            _serviceInstaller = new ServiceInstaller();
+            _processInstaller = new ServiceProcessInstaller();
 
-            processInstaller.Account = ServiceAccount.LocalSystem;
-            serviceInstaller.StartType = ServiceStartMode.Manual;
-            serviceInstaller.ServiceName = "Service";
-            Installers.Add(processInstaller);
-            Installers.Add(serviceInstaller);
+            _processInstaller.Account = ServiceAccount.LocalSystem;
+            _serviceInstaller.StartType = ServiceStartMode.Manual;
+            _serviceInstaller.ServiceName = "Service";
+            Installers.Add(_processInstaller);
+            Installers.Add(_serviceInstaller);
         }
     }
 }
