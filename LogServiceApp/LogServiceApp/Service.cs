@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.ServiceProcess;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using BL;
-using Timer = System.Timers.Timer;
+using DB.Models;
 
 namespace LogServiceApp
 {
     public partial class Service : ServiceBase
     {
         private Timer _aTimer;
-        private LoggingFile _logger;
+        private string _config = "File";
 
         public Service()
         {
@@ -23,20 +25,16 @@ namespace LogServiceApp
 
         protected override void OnStart(string[] args)
         {
+            CallCheckConfig();
             CallWrite();
 
-            //var b = ConfigurationManager.AppSettings.Get("Key0");
-            //EventLog.WriteEntry("LogServiceAppInfo", GetMemorySize().ToString(), EventLogEntryType.SuccessAudit);
-
-            _logger = new LoggingFile();
-            var loggerThread = new Thread(_logger.Start);
-            loggerThread.Start();
+            //var b = ConfigurationManager.AppSettings.Get("Key0"); // Получить ключи из конфига
+            // EventLog.WriteEntry("LogServiceAppInfo", GetMemorySize().ToString(), EventLogEntryType.SuccessAudit); //запись в лог событий windows
         }
 
         protected override void OnStop()
         {
-            _logger.Stop();
-            Thread.Sleep(1000);
+            _aTimer.Stop();
         }
 
         /// <summary>
@@ -57,7 +55,7 @@ namespace LogServiceApp
         private void CallWrite()
         {
             _aTimer = new Timer(5000);
-            _aTimer.Elapsed += WriteInDb;
+            _aTimer.Elapsed += CallMethods;
             _aTimer.AutoReset = true;
             _aTimer.Enabled = true;
         }
@@ -67,7 +65,7 @@ namespace LogServiceApp
         /// </summary>
         /// <param name="source"></param>
         /// <param name="e"></param>
-        private static async void WriteInDb(object source, ElapsedEventArgs e)
+        private static async Task WriteInDbAsync()
         {
             var loggingDb = new LoggingDb();
             await loggingDb.WriteDateAsync(DateTime.Now, GetMemorySize());
@@ -76,8 +74,53 @@ namespace LogServiceApp
         /// <summary>
         ///     Запись в Файл
         /// </summary>
-        private void WriteInFile()
+        private static async Task WriteInFileAsync()
         {
+            await Task.Run(() =>
+            {
+                var loggingFile = new LoggingFile();
+                loggingFile.WriteData(DateTime.Now, GetMemorySize());
+            });
+        }
+
+        /// <summary>
+        ///     Получить данные из файла.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private static List<Log> Get(object source, ElapsedEventArgs e)
+        {
+            var loggingFile = new LoggingFile();
+
+            return loggingFile.GetData();
+        }
+
+        private async void CallMethods(object source, ElapsedEventArgs e)
+        {
+            switch (_config)
+            {
+                case "Database":
+                    await WriteInDbAsync();
+                    break;
+                case "File":
+                    await WriteInFileAsync();
+                    break;
+            }
+        }
+
+        private void CallCheckConfig()
+        {
+            _aTimer = new Timer(10000);
+            _aTimer.Elapsed += (source, _event) =>
+            {
+                _config = ConfigurationManager.AppSettings.Get("WRITE");
+
+
+                EventLog.WriteEntry("ConfigApp", _config, EventLogEntryType.SuccessAudit);
+            };
+            _aTimer.AutoReset = true;
+            _aTimer.Enabled = true;
         }
     }
 }
