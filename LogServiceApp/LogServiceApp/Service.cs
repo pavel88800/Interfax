@@ -1,13 +1,17 @@
 ﻿using System;
-using System.IO;
+using System.Diagnostics;
 using System.ServiceProcess;
 using System.Threading;
+using System.Timers;
+using BL;
+using Timer = System.Timers.Timer;
 
 namespace LogServiceApp
 {
     public partial class Service : ServiceBase
     {
-        private Logger logger;
+        private Timer _aTimer;
+        private LoggingFile _logger;
 
         public Service()
         {
@@ -19,88 +23,61 @@ namespace LogServiceApp
 
         protected override void OnStart(string[] args)
         {
-            logger = new Logger();
-            var loggerThread = new Thread(logger.Start);
+            CallWrite();
+
+            //var b = ConfigurationManager.AppSettings.Get("Key0");
+            //EventLog.WriteEntry("LogServiceAppInfo", GetMemorySize().ToString(), EventLogEntryType.SuccessAudit);
+
+            _logger = new LoggingFile();
+            var loggerThread = new Thread(_logger.Start);
             loggerThread.Start();
         }
 
         protected override void OnStop()
         {
-            logger.Stop();
+            _logger.Stop();
             Thread.Sleep(1000);
         }
-    }
 
-    internal class Logger
-    {
-        private bool enabled = true;
-        private readonly object obj = new object();
-        private readonly FileSystemWatcher watcher;
-
-        public Logger()
+        /// <summary>
+        ///     Получить кол-во памяти занимаемой процессом
+        /// </summary>
+        /// <returns>
+        ///     <see cref="long" />
+        /// </returns>
+        private static long GetMemorySize()
         {
-            watcher = new FileSystemWatcher("D:\\Test");
-            watcher.Deleted += Watcher_Deleted;
-            watcher.Created += Watcher_Created;
-            watcher.Changed += Watcher_Changed;
-            watcher.Renamed += Watcher_Renamed;
+            var memoryBite = Process.GetProcessesByName("LogServiceApp")[0].WorkingSet64;
+            return memoryBite;
         }
 
-        public void Start()
+        /// <summary>
+        ///     Запуск таймера
+        /// </summary>
+        private void CallWrite()
         {
-            watcher.EnableRaisingEvents = true;
-            while (enabled) Thread.Sleep(1000);
+            _aTimer = new Timer(5000);
+            _aTimer.Elapsed += WriteInDb;
+            _aTimer.AutoReset = true;
+            _aTimer.Enabled = true;
         }
 
-        public void Stop()
+        /// <summary>
+        ///     Запись в БД
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        private static async void WriteInDb(object source, ElapsedEventArgs e)
         {
-            watcher.EnableRaisingEvents = false;
-            enabled = false;
+            var loggingDb = new LoggingDb();
+            await loggingDb.WriteDateAsync(DateTime.Now, GetMemorySize());
         }
 
-        // переименование файлов
-        private void Watcher_Renamed(object sender, RenamedEventArgs e)
+        /// <summary>
+        ///     Запись в Файл
+        /// </summary>
+        private void WriteInFile()
         {
-            var fileEvent = "переименован в " + e.FullPath;
-            var filePath = e.OldFullPath;
-            RecordEntry(fileEvent, filePath);
-        }
-
-        // изменение файлов
-        private void Watcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            var fileEvent = "изменен";
-            var filePath = e.FullPath;
-            RecordEntry(fileEvent, filePath);
-        }
-
-        // создание файлов
-        private void Watcher_Created(object sender, FileSystemEventArgs e)
-        {
-            var fileEvent = "создан";
-            var filePath = e.FullPath;
-            RecordEntry(fileEvent, filePath);
-        }
-
-        // удаление файлов
-        private void Watcher_Deleted(object sender, FileSystemEventArgs e)
-        {
-            var fileEvent = "удален";
-            var filePath = e.FullPath;
-            RecordEntry(fileEvent, filePath);
-        }
-
-        private void RecordEntry(string fileEvent, string filePath)
-        {
-            lock (obj)
-            {
-                using (var writer = new StreamWriter("D:\\Logs\\templog.txt", true))
-                {
-                    writer.WriteLine("{0} файл {1} был {2}", DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss"), filePath,
-                        fileEvent);
-                    writer.Flush();
-                }
-            }
         }
     }
 }

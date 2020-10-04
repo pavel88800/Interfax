@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogServiceApp", "LogServiceApp\LogServiceApp.csproj", "{398973F5-4DB4-4FD8-8F1A-C46002A8581A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DB", "DB\DB.csproj", "{C3B46242-3391-4796-BC3A-2ABF36E554CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BL", "BL\BL.csproj", "{5C49093C-1847-4DF4-BFB8-EECA80EC1558}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{398973F5-4DB4-4FD8-8F1A-C46002A8581A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{398973F5-4DB4-4FD8-8F1A-C46002A8581A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{398973F5-4DB4-4FD8-8F1A-C46002A8581A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3B46242-3391-4796-BC3A-2ABF36E554CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3B46242-3391-4796-BC3A-2ABF36E554CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3B46242-3391-4796-BC3A-2ABF36E554CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3B46242-3391-4796-BC3A-2ABF36E554CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C49093C-1847-4DF4-BFB8-EECA80EC1558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C49093C-1847-4DF4-BFB8-EECA80EC1558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C49093C-1847-4DF4-BFB8-EECA80EC1558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C49093C-1847-4DF4-BFB8-EECA80EC1558}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
