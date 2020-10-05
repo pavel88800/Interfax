@@ -2,7 +2,7 @@
     ViewData["Title"] = "Home Page";
 }
 
-
+@model IEnumerable<WebApplication.Controllers.Helpers.Log>
 <table border="1">
     <caption>Таблица логов</caption>
     <tr>
@@ -15,7 +15,10 @@
     @foreach (var b in ViewBag.Logs)
     {
         <tr>
-            <td>@b.Id</td><td>@b.Date</td><td>@b.MemorySize</td><td>@ViewBag.Write</td>
+            <td>@b.Id</td>
+            <td>@b.Date</td>
+            <td>@b.MemorySize</td>
+            <td>@ViewBag.Write</td>
         </tr>
     }
 </table>

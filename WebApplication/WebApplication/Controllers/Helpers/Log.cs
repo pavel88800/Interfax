@@ -2,7 +2,7 @@
 
 namespace WebApplication.Controllers.Helpers
 {
-    internal class Log
+    public class Log
     {
         /// <summary>
         ///     Идентификатор
