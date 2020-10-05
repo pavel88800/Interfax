@@ -22,7 +22,7 @@ namespace WebApplication.Controllers
         public async Task<IActionResult> Index()
         {
             var resultJson = await GetData();
-            var result = JsonConvert.DeserializeObject<Obb>(resultJson);
+            var result = JsonConvert.DeserializeObject<Dto>(resultJson);
             WriteInViewBag(result);
             return View();
         }
@@ -47,7 +47,7 @@ namespace WebApplication.Controllers
         ///     Запись в ViewBag
         /// </summary>
         /// <param name="obj"></param>
-        private void WriteInViewBag(Obb obj)
+        private void WriteInViewBag(Dto obj)
         {
             ViewBag.Logs = obj.Logs;
             ViewBag.Write = obj.Writing;
